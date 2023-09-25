@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+  workflow_run:
+    workflows: ["CI/CD"]
+    types:
+      - completed
 
 jobs:
   unit-test:
@@ -49,4 +56,36 @@ jobs:
 
       - name: NPM install,build
         run: |
-          npm install        
+          npm install    
+              
+  # Deploy job to fit render.com
+  deploy:
+    name: Deploy
+    needs: [build,unit-test] # Our tests must pass in order to run the deploy job
+    runs-on: ubuntu-latest
+
+    steps: 
+      # - name: Deploy to production
+      #   uses: johnbeynon/render-deploy-action@v0.0.8
+      #   with:
+      #     service-id: ${{ secrets.SERVICE_ID }} # Can be found as part of the Deploy Hook
+      #     api-key: ${{ secrets.RENDER_API_KEY }} # Create your API key in Render Dashboard > Account Settings
+      - name: Deploy to prod
+        run: |
+          echo "code deployed to production"
+
+  #Test job
+  test:
+    name: E2E tests
+    needs: [deploy]
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout Test Repository
+        uses: actions/checkout@v3
+        with:
+          ref: main
+      - name: Run tests
+        run: |
+          npm install
+          npm test
