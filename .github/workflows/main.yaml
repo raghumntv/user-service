@@ -1,0 +1,52 @@
+name: Node.JS CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Unit Tests
+        run: npm run unit 
+
+  build:
+    name: User app
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' # Only run on push to main branch
+
+    strategy: 
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v3 
+        with: 
+          fetch-depth: 0
+
+      - name: Use Node.JS ${{ matrix.node-version }}
+        uses: actions/setup-node@v3 
+        with: 
+          node-version: ${{ matrix.node-version }}
+
+      - name: NPM install,build
+        run: |
+          npm install        
