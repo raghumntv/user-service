@@ -34,7 +34,6 @@ jobs:
       - name: Run Unit Tests
         run: |
           npm run unit
-          exit 1
 
   build:
     name: User app
