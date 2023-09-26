@@ -35,6 +35,28 @@ jobs:
         run: |
           npm run unit
 
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Integration Tests
+        run: |
+          npm run integration          
+
   build:
     name: User app
     runs-on: ubuntu-latest
@@ -62,7 +84,7 @@ jobs:
   # Deploy job to fit render.com
   deploy:
     name: Deploy
-    needs: [build,unit-test] # Our tests must pass in order to run the deploy job
+    needs: [build,unit-test,integration-test] # Our tests must pass in order to run the deploy job
     runs-on: ubuntu-latest
 
     steps: 
